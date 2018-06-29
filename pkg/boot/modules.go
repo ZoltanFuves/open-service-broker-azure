@@ -7,23 +7,25 @@ import (
 
 	// aciSDK "github.com/Azure/azure-sdk-for-go/services/containerinstance/mgmt/2017-08-01-preview/containerinstance"
 	// cosmosSDK "github.com/Azure/azure-sdk-for-go/services/cosmos-db/mgmt/2015-04-08/documentdb"
-	// eventHubSDK "github.com/Azure/azure-sdk-for-go/services/eventhub/mgmt/2017-04-01/eventhub"
+	eventHubSDK "github.com/Azure/azure-sdk-for-go/services/eventhub/mgmt/2017-04-01/eventhub"
 	// keyVaultSDK "github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2016-10-01/keyvault"
 	mysqlSDK "github.com/Azure/azure-sdk-for-go/services/mysql/mgmt/2017-04-30-preview/mysql"
 	postgresSDK "github.com/Azure/azure-sdk-for-go/services/postgresql/mgmt/2017-04-30-preview/postgresql"
 	// redisSDK "github.com/Azure/azure-sdk-for-go/services/redis/mgmt/2017-10-01/redis"
 	resourcesSDK "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2017-05-10/resources"
 	// searchSDK "github.com/Azure/azure-sdk-for-go/services/search/mgmt/2015-08-19/search"
-	// servicebusSDK "github.com/Azure/azure-sdk-for-go/services/servicebus/mgmt/2017-04-01/servicebus"
+	servicebusSDK "github.com/Azure/azure-sdk-for-go/services/servicebus/mgmt/2017-04-01/servicebus"
 	sqlSDK "github.com/Azure/azure-sdk-for-go/services/sql/mgmt/2017-03-01-preview/sql"
 	// storageSDK "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/open-service-broker-azure/pkg/azure"
 	"github.com/Azure/open-service-broker-azure/pkg/azure/arm"
 	"github.com/Azure/open-service-broker-azure/pkg/service"
+	"github.com/Azure/open-service-broker-azure/pkg/services/eventhubs"
 	"github.com/Azure/open-service-broker-azure/pkg/services/mssql"
 	"github.com/Azure/open-service-broker-azure/pkg/services/mysql"
 	"github.com/Azure/open-service-broker-azure/pkg/services/postgresql"
+	"github.com/Azure/open-service-broker-azure/pkg/services/servicebus"
 	"github.com/Azure/open-service-broker-azure/pkg/version"
 )
 
@@ -76,13 +78,13 @@ func getModules(
 	// cosmosdbAccountsClient.UserAgent =
 	// 	getUserAgent(cosmosdbAccountsClient.Client)
 
-	// eventHubNamespacesClient := eventHubSDK.NewNamespacesClientWithBaseURI(
-	// 	azureConfig.Environment.ResourceManagerEndpoint,
-	// 	azureSubscriptionID,
-	// )
-	// eventHubNamespacesClient.Authorizer = authorizer
-	// eventHubNamespacesClient.UserAgent =
-	// 	getUserAgent(eventHubNamespacesClient.Client)
+	eventHubNamespacesClient := eventHubSDK.NewNamespacesClientWithBaseURI(
+		azureConfig.Environment.ResourceManagerEndpoint,
+		azureSubscriptionID,
+	)
+	eventHubNamespacesClient.Authorizer = authorizer
+	eventHubNamespacesClient.UserAgent =
+		getUserAgent(eventHubNamespacesClient.Client)
 
 	// keyVaultsClient := keyVaultSDK.NewVaultsClientWithBaseURI(
 	// 	azureConfig.Environment.ResourceManagerEndpoint,
@@ -160,13 +162,13 @@ func getModules(
 	// searchServicesClient.Authorizer = authorizer
 	// searchServicesClient.UserAgent = getUserAgent(searchServicesClient.Client)
 
-	// serviceBusNamespacesClient := servicebusSDK.NewNamespacesClientWithBaseURI(
-	// 	azureConfig.Environment.ResourceManagerEndpoint,
-	// 	azureSubscriptionID,
-	// )
-	// serviceBusNamespacesClient.Authorizer = authorizer
-	// serviceBusNamespacesClient.UserAgent =
-	// 	getUserAgent(serviceBusNamespacesClient.Client)
+	serviceBusNamespacesClient := servicebusSDK.NewNamespacesClientWithBaseURI(
+		azureConfig.Environment.ResourceManagerEndpoint,
+		azureSubscriptionID,
+	)
+	serviceBusNamespacesClient.Authorizer = authorizer
+	serviceBusNamespacesClient.UserAgent =
+		getUserAgent(serviceBusNamespacesClient.Client)
 
 	// storageAccountsClient := storageSDK.NewAccountsClientWithBaseURI(
 	// 	azureConfig.Environment.ResourceManagerEndpoint,
@@ -190,8 +192,8 @@ func getModules(
 			mysqlServersClient,
 			mysqlDatabasesClient,
 		),
-		// servicebus.New(armDeployer, serviceBusNamespacesClient),
-		// eventhubs.New(armDeployer, eventHubNamespacesClient),
+		servicebus.New(armDeployer, serviceBusNamespacesClient),
+		eventhubs.New(armDeployer, eventHubNamespacesClient),
 		// keyvault.New(azureConfig.TenantID, armDeployer, keyVaultsClient),
 		mssql.New(
 			azureConfig.Environment,
